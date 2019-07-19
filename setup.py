@@ -1,4 +1,5 @@
 from setuptools import find_packages, setup
+import warnings
 
 DEPENDENCY_PACKAGE_NAMES = ["matplotlib", "torch", "tqdm", "numpy"]
 
@@ -12,11 +13,13 @@ def check_dependencies():
             missing_dependencies.append(package_name)
 
     if missing_dependencies:
-        raise ValueError(
-            'Missing dependencies: {}. We recommend you follow '
-            'the installation instructions at '
-            'https://github.com/hassony2/libyana#installation'.format(
-                missing_dependencies))
+        warnings.warn(
+            "Missing dependencies: {}. We recommend you follow "
+            "the installation instructions at "
+            "https://github.com/hassony2/libyana#installation".format(
+                missing_dependencies
+            )
+        )
 
 
 with open("README.md", "r") as fh:
@@ -29,7 +32,7 @@ setup(
     version="0.0.1",
     author="Yana Hasson",
     author_email="yana.hasson.inria@gmail.com",
-    packages=find_packages(exclude=('tests',)),
+    packages=find_packages(exclude=("tests",)),
     python_requires=">=3.5.0",
     description="My cross-project utilities",
     long_description=long_description,
