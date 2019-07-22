@@ -1,8 +1,11 @@
 import numpy as np
+from torch.distributions.uniform import Uniform
+from torch.distributions.normal import Normal
+
 try:
     from PIL import Image
 except ImportError:
-    print('Could not import PIL in handutils')
+    print("Could not import PIL in handutils")
 
 
 def get_annot_scale(annots, visibility=None, scale_factor=2.2):
@@ -55,9 +58,40 @@ def transform_img(img, affine_trans, res):
     trans = np.linalg.inv(affine_trans)
 
     img = img.transform(
-        tuple(res), Image.AFFINE, (trans[0, 0], trans[0, 1], trans[0, 2],
-                                   trans[1, 0], trans[1, 1], trans[1, 2]))
+        tuple(res),
+        Image.AFFINE,
+        (
+            trans[0, 0],
+            trans[0, 1],
+            trans[0, 2],
+            trans[1, 0],
+            trans[1, 1],
+            trans[1, 2],
+        ),
+    )
     return img
+
+
+def sample_center_scale(
+    scale, center, scale_jittering, center_jittering, rot=0
+):
+    # Randomly jitter center
+    # Center is located in square of size 2*center_jitter_factor
+    # in center of cropped image
+    center_offsets = (
+        center_jittering * scale * Uniform(low=-1, high=1).sample((2,)).numpy()
+    )
+
+    center = center + center_offsets.astype(int)
+
+    # Scale jittering
+    scale_jittering = scale_jittering * Normal(0, 1).sample().item() + 1
+    scale_jittering = np.clip(
+        scale_jittering, 1 - scale_jittering, 1 + scale_jittering
+    )
+    scale = scale * scale_jittering
+    rot = Uniform(low=-rot, high=rot).sample().item()
+    return scale, center, rot
 
 
 def get_affine_transform(center, scale, res, rot=0):
@@ -67,9 +101,7 @@ def get_affine_transform(center, scale, res, rot=0):
     rot_mat[1, :2] = [sn, cs]
     rot_mat[2, 2] = 1
     # Rotate center to obtain coordinate of center in rotated image
-    origin_rot_center = rot_mat.dot(center.tolist() + [
-        1,
-    ])[:2]
+    origin_rot_center = rot_mat.dot(center.tolist() + [1])[:2]
     # Get center for transform with verts rotated around optical axis
     # (through pixel center, smthg like 128, 128 in pixels and 0,0 in 3d world)
     # For this, rotate the center but around center of image (vs 0,0 in pixel space)
@@ -78,25 +110,28 @@ def get_affine_transform(center, scale, res, rot=0):
     t_mat[1, 2] = -res[0] / 2
     t_inv = t_mat.copy()
     t_inv[:2, 2] *= -1
-    transformed_center = t_inv.dot(rot_mat).dot(t_mat).dot(center.tolist() + [
-        1,
-    ])
+    transformed_center = (
+        t_inv.dot(rot_mat).dot(t_mat).dot(center.tolist() + [1])
+    )
     post_rot_trans = get_affine_trans_no_rot(origin_rot_center, scale, res)
     total_trans = post_rot_trans.dot(rot_mat)
     # check_t = get_affine_transform_bak(center, scale, res, rot)
     # print(total_trans, check_t)
-    affinetrans_post_rot = get_affine_trans_no_rot(transformed_center[:2],
-                                                   scale, res)
-    return total_trans.astype(np.float32), affinetrans_post_rot.astype(
-        np.float32)
+    affinetrans_post_rot = get_affine_trans_no_rot(
+        transformed_center[:2], scale, res
+    )
+    return (
+        total_trans.astype(np.float32),
+        affinetrans_post_rot.astype(np.float32),
+    )
 
 
 def get_affine_trans_no_rot(center, scale, res):
     affinet = np.zeros((3, 3))
     affinet[0, 0] = float(res[1]) / scale
     affinet[1, 1] = float(res[0]) / scale
-    affinet[0, 2] = res[1] * (-float(center[0]) / scale + .5)
-    affinet[1, 2] = res[0] * (-float(center[1]) / scale + .5)
+    affinet[0, 2] = res[1] * (-float(center[0]) / scale + 0.5)
+    affinet[1, 2] = res[0] * (-float(center[1]) / scale + 0.5)
     affinet[2, 2] = 1
     return affinet
 
@@ -105,8 +140,8 @@ def get_affine_transform_bak(center, scale, res, rot):
     t = np.zeros((3, 3))
     t[0, 0] = float(res[1]) / scale
     t[1, 1] = float(res[0]) / scale
-    t[0, 2] = res[1] * (-float(center[0]) / scale + .5)
-    t[1, 2] = res[0] * (-float(center[1]) / scale + .5)
+    t[0, 2] = res[1] * (-float(center[0]) / scale + 0.5)
+    t[1, 2] = res[0] * (-float(center[1]) / scale + 0.5)
     t[2, 2] = 1
     if rot != 0:
         rot_mat = np.zeros((3, 3))
@@ -121,4 +156,3 @@ def get_affine_transform_bak(center, scale, res, rot):
         t_inv[:2, 2] *= -1
         t = np.dot(t_inv, np.dot(rot_mat, np.dot(t_mat, t))).astype(np.float32)
     return t, t
-
