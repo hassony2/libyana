@@ -60,21 +60,12 @@ def transform_img(img, affine_trans, res):
     img = img.transform(
         tuple(res),
         Image.AFFINE,
-        (
-            trans[0, 0],
-            trans[0, 1],
-            trans[0, 2],
-            trans[1, 0],
-            trans[1, 1],
-            trans[1, 2],
-        ),
+        (trans[0, 0], trans[0, 1], trans[0, 2], trans[1, 0], trans[1, 1], trans[1, 2]),
     )
     return img
 
 
-def sample_center_scale(
-    scale, center, scale_jittering, center_jittering, rot=0
-):
+def sample_center_scale(scale, center, scale_jittering, center_jittering, rot=0):
     # Randomly jitter center
     # Center is located in square of size 2*center_jitter_factor
     # in center of cropped image
@@ -86,9 +77,7 @@ def sample_center_scale(
 
     # Scale jittering
     scale_jittering = scale_jittering * Normal(0, 1).sample().item() + 1
-    scale_jittering = np.clip(
-        scale_jittering, 1 - scale_jittering, 1 + scale_jittering
-    )
+    scale_jittering = np.clip(scale_jittering, 1 - scale_jittering, 1 + scale_jittering)
     scale = scale * scale_jittering
     rot = Uniform(low=-rot, high=rot).sample().item()
     return scale, center, rot
@@ -110,20 +99,13 @@ def get_affine_transform(center, scale, res, rot=0):
     t_mat[1, 2] = -res[0] / 2
     t_inv = t_mat.copy()
     t_inv[:2, 2] *= -1
-    transformed_center = (
-        t_inv.dot(rot_mat).dot(t_mat).dot(center.tolist() + [1])
-    )
+    transformed_center = t_inv.dot(rot_mat).dot(t_mat).dot(center.tolist() + [1])
     post_rot_trans = get_affine_trans_no_rot(origin_rot_center, scale, res)
     total_trans = post_rot_trans.dot(rot_mat)
     # check_t = get_affine_transform_bak(center, scale, res, rot)
     # print(total_trans, check_t)
-    affinetrans_post_rot = get_affine_trans_no_rot(
-        transformed_center[:2], scale, res
-    )
-    return (
-        total_trans.astype(np.float32),
-        affinetrans_post_rot.astype(np.float32),
-    )
+    affinetrans_post_rot = get_affine_trans_no_rot(transformed_center[:2], scale, res)
+    return (total_trans.astype(np.float32), affinetrans_post_rot.astype(np.float32))
 
 
 def get_affine_trans_no_rot(center, scale, res):
