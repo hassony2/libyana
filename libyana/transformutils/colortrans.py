@@ -1,6 +1,6 @@
 import random
 
-import torchvision.transforms.functional as torchfn
+from libyana.transformutils import torchfn
 
 
 def get_color_params(brightness=0, contrast=0, saturation=0, hue=0):
