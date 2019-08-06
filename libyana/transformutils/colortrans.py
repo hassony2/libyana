@@ -26,24 +26,43 @@ def get_color_params(brightness=0, contrast=0, saturation=0, hue=0):
     return bright_factor, contrast_factor, sat_factor, hue_factor
 
 
-def color_jitter(img, brightness=0, contrast=0, saturation=0, hue=0):
-    brightness, contrast, saturation, hue = get_color_params(
-        brightness=brightness, contrast=contrast, saturation=saturation, hue=hue
-    )
-
+def apply_jitter(img, brightness=0, contrast=0, saturation=0, hue=0):
     # Create img transform function sequence
     img_transforms = []
     if brightness is not None:
-        img_transforms.append(lambda img: torchfn.adjust_brightness(img, brightness))
+        img_transforms.append(
+            lambda img: torchfn.adjust_brightness(img, brightness)
+        )
     if saturation is not None:
-        img_transforms.append(lambda img: torchfn.adjust_saturation(img, saturation))
+        img_transforms.append(
+            lambda img: torchfn.adjust_saturation(img, saturation)
+        )
     if hue is not None:
         img_transforms.append(lambda img: torchfn.adjust_hue(img, hue))
     if contrast is not None:
-        img_transforms.append(lambda img: torchfn.adjust_contrast(img, contrast))
+        img_transforms.append(
+            lambda img: torchfn.adjust_contrast(img, contrast)
+        )
     random.shuffle(img_transforms)
 
     jittered_img = img
     for func in img_transforms:
         jittered_img = func(jittered_img)
+    return jittered_img
+
+
+def color_jitter(img, brightness=0, contrast=0, saturation=0, hue=0):
+    brightness, contrast, saturation, hue = get_color_params(
+        brightness=brightness,
+        contrast=contrast,
+        saturation=saturation,
+        hue=hue,
+    )
+    jittered_img = apply_jitter(
+        img,
+        brightness=brightness,
+        contrast=contrast,
+        saturation=saturation,
+        hue=hue,
+    )
     return jittered_img
