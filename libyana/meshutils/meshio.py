@@ -1,4 +1,25 @@
 import numpy as np
+import tinyobjloader
+
+
+def faster_load_obj(obj_path):
+    reader = tinyobjloader.ObjReader()
+    ret = reader.ParseFromFile(obj_path)
+    if ret is False:
+        raise RuntimeError(f"Could not load {obj_path} with tinyobjloader")
+    attrib = reader.GetAttrib()
+    shapes = reader.GetShapes()
+    vert_nb = len(attrib.vertices) // 3
+    vertices = np.array(attrib.vertices).reshape(vert_nb, 3)
+    faces = [
+        index.vertex_index for shape in shapes for index in shape.mesh.indices
+    ]
+    face_nb = len(faces) // 3
+    faces = np.array(faces).reshape(face_nb, 3)
+    colors = np.array(attrib.colors).reshape(
+        vert_nb, len(attrib.colors) // vert_nb
+    )
+    return {"vertices": vertices, "faces": faces, "colors": colors}
 
 
 def fast_load_obj(file_obj, **kwargs):
