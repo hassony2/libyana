@@ -19,7 +19,17 @@ def faster_load_obj(obj_path):
     colors = np.array(attrib.colors).reshape(
         vert_nb, len(attrib.colors) // vert_nb
     )
-    return {"vertices": vertices, "faces": faces, "colors": colors}
+    if len(attrib.texcoords):
+        tex_coords_nb = len(attrib.texcoords) // 2
+        texcoords = np.array(attrib.texcoords).reshape(tex_coords_nb, 2)
+    else:
+        texcoords = None
+    return {
+        "vertices": vertices,
+        "faces": faces,
+        "colors": colors,
+        "texcoords": texcoords,
+    }
 
 
 def fast_load_obj(file_obj, **kwargs):
