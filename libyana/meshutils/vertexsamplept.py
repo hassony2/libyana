@@ -1,24 +1,25 @@
-import numpy as np
+import torch
 from matplotlib import pyplot as plt
+
+plt.switch_backend("agg")
 
 
 def tri_area(v):
-    return 0.5 * np.linalg.norm(
-        np.cross(v[:, 1] - v[:, 0], v[:, 2] - v[:, 0]), axis=1
+    return 0.5 * torch.norm(
+        torch.cross(v[:, 1] - v[:, 0], v[:, 2] - v[:, 0]), 2, 1
     )
 
 
 def points_from_mesh(faces, vertices, vertex_nb=600, show_cloud=False):
-    areas = tri_area(vertices[faces])
+    verts_faces = vertices[faces.long()]
+    areas = tri_area(verts_faces)
 
     proba = areas / areas.sum()
-    rand_idxs = np.random.choice(
-        range(areas.shape[0]), size=vertex_nb, p=proba
-    )
+    rand_idxs = torch.multinomial(proba, vertex_nb, True)
 
     # Randomly pick points on triangles
-    u = np.random.rand(vertex_nb, 1)
-    v = np.random.rand(vertex_nb, 1)
+    u = torch.rand(vertex_nb, 1)
+    v = torch.rand(vertex_nb, 1)
 
     # Force bernouilli couple to be picked on a half square
     out = u + v > 1
@@ -34,9 +35,9 @@ def points_from_mesh(faces, vertices, vertex_nb=600, show_cloud=False):
 
     if show_cloud:
         fig = plt.figure()
-        ax = fig.add_subplot(111, projection="3d")
-        ax.scatter(points[:, 0], points[:, 1], points[:, 2], s=2, c="b")
-        ax.scatter(vertices[:, 0], vertices[:, 1], vertices[:, 2], s=2, c="r")
+        ax = fig.add_subplot(111)
+        ax.scatter(points[:, 0], points[:, 1], s=2, c="b")
+        ax.scatter(vertices[:, 0], vertices[:, 1], s=2, c="r")
         ax._axis3don = False
-        plt.show()
+        plt.savefig("tmp.png")
     return points
