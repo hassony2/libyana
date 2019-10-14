@@ -1,5 +1,13 @@
+import warnings
+
 import numpy as np
-import tinyobjloader
+
+try:
+    import tinyobjloader
+except ImportError:
+    warnings.warn(
+        "Could not laod tinyobjloader for faster_load_obj, use fast_load_obj"
+    )
 
 
 def faster_load_obj(obj_path):
