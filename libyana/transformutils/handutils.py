@@ -45,7 +45,7 @@ def transform_coords(pts, affine_trans, invert=False):
         affine_trans = np.linalg.inv(affine_trans)
     hom2d = np.concatenate([pts, np.ones([np.array(pts).shape[0], 1])], 1)
     transformed_rows = affine_trans.dot(hom2d.transpose()).transpose()[:, :2]
-    return transformed_rows.astype(int)
+    return transformed_rows
 
 
 def transform_img(img, affine_trans, res):
@@ -75,9 +75,11 @@ def transform_img(img, affine_trans, res):
 def sample_center_scale(
     scale, center, scale_jittering, center_jittering, rot=0
 ):
-    # Randomly jitter center
-    # Center is located in square of size 2*center_jitter_factor
-    # in center of cropped image
+    """
+    Randomly jitter center, scale and rotation
+    Center is located in square of size 2*center_jitter_factor
+    in center of cropped image
+    """
     center_offsets = (
         center_jittering * scale * Uniform(low=-1, high=1).sample((2,)).numpy()
     )
