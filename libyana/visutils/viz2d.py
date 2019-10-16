@@ -36,7 +36,7 @@ def visualize_joints_2d(
 
 
 def _draw2djoints(ax, annots, links, alpha=1, linewidth=1, color=None):
-    colors = ["r", "m", "b", "c", "g", "o", "y", "b"]
+    colors = ["r", "m", "b", "c", "g", "y", "b"]
 
     for finger_idx, finger_links in enumerate(links):
         for idx in range(len(finger_links) - 1):
