@@ -1,6 +1,26 @@
 from matplotlib import pyplot as plt
 
 
+def visualize_corners_2d(
+    ax, corners, joint_idxs=True, links=None, alpha=1, linewidth=2
+):
+    visualize_joints_2d(
+        ax,
+        corners,
+        alpha=alpha,
+        joint_idxs=joint_idxs,
+        linewidth=linewidth,
+        links=[
+            [0, 1, 3, 2],
+            [4, 5, 7, 6],
+            [1, 5],
+            [3, 7],
+            [4, 0],
+            [0, 2, 6, 4],
+        ],
+    )
+
+
 def visualize_joints_2d(
     ax,
     joints,
