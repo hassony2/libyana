@@ -2,7 +2,7 @@ from matplotlib import pyplot as plt
 
 
 def visualize_corners_2d(
-    ax, corners, joint_idxs=True, links=None, alpha=1, linewidth=2
+    ax, corners, joint_idxs=False, links=None, alpha=1, linewidth=2
 ):
     visualize_joints_2d(
         ax,
