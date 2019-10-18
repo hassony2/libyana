@@ -58,7 +58,7 @@ def batch_vertex_textures(faces, vertex_colors, texture_size=2):
     assert (
         vertex_colors.shape[2] == 3
     ), f"expect shape (face_nb, 3), got {faces.shape}"
-    textures = torch.zeros(
+    textures = vertex_colors.new_zeros(
         faces.shape[0],
         faces.shape[1],
         texture_size,
