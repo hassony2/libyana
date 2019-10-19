@@ -1,13 +1,16 @@
 import torch
 
 
-def vertex_textures(faces, vertex_colors, texture_size=2):
+def vertex_textures(
+    faces, vertex_colors, texture_size=2, with_artefacts=False
+):
     """
     Create textures for neural_renderer from vertex colors
 
     Args:
         faces (nb_faces, 3): contains the indexes of vertex for each face
         vertex_colors (vertex_nb, 3)
+        with_artefacts (bool): Create artefacts that highlight vertices
     """
     assert faces.dim() == 2, f"expected shape (face_nb, 3), got {faces.shape}"
     assert (
@@ -31,17 +34,26 @@ def vertex_textures(faces, vertex_colors, texture_size=2):
                 for tex_idx3 in range(texture_size):
                     sum_idxs = tex_idx1 + tex_idx2 + tex_idx3
                     if sum_idxs:
-                        textures[:, tex_idx1, tex_idx2, tex_idx3] = (
-                            tex_idx1 / sum_idxs * f1_colors
-                            + tex_idx2 / sum_idxs * f2_colors
-                            + tex_idx3 / sum_idxs * f3_colors
-                        )
+                        if with_artefacts:
+                            textures[:, tex_idx1, tex_idx2, tex_idx3] = (
+                                tex_idx1 * f1_colors
+                                + tex_idx2 * f2_colors
+                                + tex_idx3 * f3_colors
+                            ) / sum_idxs
+                        else:
+                            textures[:, tex_idx1, tex_idx2, tex_idx3] = (
+                                tex_idx1 * f1_colors
+                                + tex_idx2 * f2_colors
+                                + tex_idx3 * f3_colors
+                            )
     else:
         textures[:, 0, 0, 0] = f1_colors
     return textures
 
 
-def batch_vertex_textures(faces, vertex_colors, texture_size=2):
+def batch_vertex_textures(
+    faces, vertex_colors, texture_size=2, with_artefacts=False
+):
     """
     Create textures for neural_renderer from vertex colors
     Args:
@@ -81,11 +93,18 @@ def batch_vertex_textures(faces, vertex_colors, texture_size=2):
                 for tex_idx3 in range(texture_size):
                     sum_idxs = tex_idx1 + tex_idx2 + tex_idx3
                     if sum_idxs:
-                        textures[:, :, tex_idx1, tex_idx2, tex_idx3] = (
-                            tex_idx1 / sum_idxs * f1_colors
-                            + tex_idx2 / sum_idxs * f2_colors
-                            + tex_idx3 / sum_idxs * f3_colors
-                        )
+                        if with_artefacts:
+                            textures[:, :, tex_idx1, tex_idx2, tex_idx3] = (
+                                tex_idx1 * f1_colors
+                                + tex_idx2 * f2_colors
+                                + tex_idx3 * f3_colors
+                            ) / sum_idxs
+                        else:
+                            textures[:, :, tex_idx1, tex_idx2, tex_idx3] = (
+                                tex_idx1 * f1_colors
+                                + tex_idx2 * f2_colors
+                                + tex_idx3 * f3_colors
+                            )
     else:
         textures[:, :, 0, 0, 0] = f1_colors
     return textures
