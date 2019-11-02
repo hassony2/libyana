@@ -22,6 +22,7 @@ def batch_compute_normals(vertices, faces):
     p1 = torch.gather(vertices, 1, faces[:, :, 0:1].repeat(1, 1, 3))
     p2 = torch.gather(vertices, 1, faces[:, :, 1:2].repeat(1, 1, 3))
     p3 = torch.gather(vertices, 1, faces[:, :, 2:].repeat(1, 1, 3))
+
     v1 = p2 - p1
     v2 = p3 - p1
     face_norms = torch.cross(v1, v2)
@@ -32,7 +33,7 @@ def batch_compute_normals(vertices, faces):
     flat_face_norms = face_norms.repeat(1, 3, 1)
     compute_normals(vertices[0], faces[0])
 
-    vert_norms = torch.zeros(vertices.shape).scatter_add(
+    vert_norms = torch.zeros_like(vertices).scatter_add(
         1, flat_face_idxs.unsqueeze(-1).long().repeat(1, 1, 3), flat_face_norms
     )
     vert_norms = torch_f.normalize(vert_norms, 2, -1)
