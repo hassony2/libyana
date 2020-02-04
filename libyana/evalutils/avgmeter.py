@@ -6,12 +6,14 @@ class AverageMeter(object):
 
     def reset(self):
         self.val = 0
+        self.vals = []
         self.avg = 0
         self.sum = 0
         self.count = 0
 
     def update(self, val, n=1):
         self.val = val
+        self.vals.append(val)
         self.sum += val * n
         self.count += n
         self.avg = self.sum / self.count
