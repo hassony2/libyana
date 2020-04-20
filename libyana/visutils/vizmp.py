@@ -1,6 +1,29 @@
 import numpy as np
 
 
+def get_axis(axes, row_idx: int, col_idx: int, row_nb: int = 1, col_nb: int = 1):
+    """
+    Get matplotlib axis from array of axis returned by matplotlib
+    subplots(row_nb, col_nb) given index of column and row,
+    and total number of columns and rows
+
+    Args:
+        row_idx: idx or row to retriev
+        col_idx: idx of column to retrieve
+        row_nb: total number of rows
+        col_nb: total number of cols
+    """
+    if col_nb == 1 and row_nb == 1:
+        ax = axes
+    elif col_nb == 1:
+        ax = axes[row_idx]
+    elif row_nb == 1:
+        ax = axes[col_idx]
+    else:
+        ax = axes[row_idx, col_idx]
+    return ax
+
+
 def fig2np(fig):
     fig.canvas.draw()
 
