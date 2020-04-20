@@ -39,7 +39,7 @@ def fig2np(fig):
 
 
 def color_borders(
-    ax, color=(1, 0, 0), locations=("top", "bottom", "right", "lefft"), hide_ticks=True
+    ax, color=(1, 0, 0), locations=("top", "bottom", "right", "left"), hide_ticks=True
 ):
     for loc in locations:
         ax.spines[loc].set_color(color)
