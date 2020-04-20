@@ -36,3 +36,13 @@ def fig2np(fig):
     # Roll the ALPHA channel to have it in RGBA mode
     buf = np.roll(buf, 3, axis=2)
     return buf
+
+
+def color_borders(
+    ax, color=(1, 0, 0), locations=("top", "bottom", "right", "lefft"), hide_ticks=True
+):
+    for loc in locations:
+        ax.spines[loc].set_color(color)
+    if hide_ticks:
+        ax.set_xticks([])
+        ax.set_yticks([])
