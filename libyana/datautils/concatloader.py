@@ -2,6 +2,9 @@ import itertools
 from torch.utils.data import Subset
 
 
+import itertools
+
+
 class ConcatDataloader:
     def __init__(self, dataloaders):
         self.loaders = dataloaders
@@ -15,22 +18,6 @@ class ConcatDataloader:
         loader_idx = next(self.idx_cycle)
         loader = self.iters[loader_idx]
         batch = next(loader)
-        if isinstance(loader.dataset, Subset):
-            dataset = loader.dataset.dataset
-        else:
-            dataset = loader.dataset
-        dat_name = dataset.pose_dataset.name
-        batch["dataset"] = dat_name
-        if dat_name == "stereohands" or dat_name == "zimsynth":
-            batch["root"] = "palm"
-        else:
-            batch["root"] = "wrist"
-        if dat_name == "stereohands":
-            batch["use_stereohands"] = True
-        else:
-            batch["use_stereohands"] = False
-        batch["split"] = dataset.pose_dataset.split
-
         return batch
 
     def __len__(self):
