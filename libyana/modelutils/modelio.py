@@ -28,38 +28,43 @@ def load_checkpoints(model, resume_paths, strict=True):
 
 
 def load_checkpoint(
-    model, resume_path, optimizer=None, strict=True, load_atlas=False
+    model, resume_path, optimizer=None, strict=True, load_atlas=False, as_parallel=False
 ):
     if os.path.isfile(resume_path):
         print("=> loading checkpoint '{}'".format(resume_path))
         checkpoint = torch.load(resume_path)
-        if "module" in list(checkpoint["state_dict"].keys())[0]:
-            state_dict = checkpoint["state_dict"]
+        if as_parallel:
+            if "module" in list(checkpoint["state_dict"].keys())[0]:
+                state_dict = checkpoint["state_dict"]
+            else:
+                state_dict = {
+                    "module.{}".format(key): item
+                    for key, item in checkpoint["state_dict"].items()
+                }
         else:
-            state_dict = {
-                "module.{}".format(key): item
-                for key, item in checkpoint["state_dict"].items()
-            }
-            print(
-                "=> loaded checkpoint '{}' (epoch {})".format(
-                    resume_path, checkpoint["epoch"]
-                )
+            if "module" in list(checkpoint["state_dict"].keys())[0]:
+                state_dict = {
+                    ".".join(key.split(".")[1:]): item
+                    for key, item in checkpoint["state_dict"].items()
+                }
+            else:
+                state_dict = checkpoint["state_dict"]
+        print(
+            "=> loaded checkpoint '{}' (epoch {})".format(
+                resume_path, checkpoint["epoch"]
             )
+        )
         if load_atlas:
             # Load encoder to separate encoder branch
             atlas_state_dict = {}
             for key, val in state_dict.items():
                 if "base_net" in key:
-                    atlas_state_dict[
-                        key.replace("base_net", "atlas_base_net")
-                    ] = val
+                    atlas_state_dict[key.replace("base_net", "atlas_base_net")] = val
                 else:
                     atlas_state_dict[key] = val
             state_dict = atlas_state_dict
 
-        missing_states = set(model.state_dict().keys()) - set(
-            state_dict.keys()
-        )
+        missing_states = set(model.state_dict().keys()) - set(state_dict.keys())
         if len(missing_states) > 0:
             warnings.warn("Missing keys ! : {}".format(missing_states))
         model.load_state_dict(state_dict, strict=strict)
@@ -70,16 +75,12 @@ def load_checkpoint(
                 )
                 if len(missing_states) > 0:
                     warnings.warn(
-                        "Missing keys in optimizer ! : {}".format(
-                            missing_states
-                        )
+                        "Missing keys in optimizer ! : {}".format(missing_states)
                     )
                 optimizer.load_state_dict(checkpoint["optimizer"])
             except ValueError:
                 traceback.print_exc()
-                warnings.warn(
-                    "Couldn' load optimizer from {}".format(resume_path)
-                )
+                warnings.warn("Couldn' load optimizer from {}".format(resume_path))
     else:
         raise ValueError("=> no checkpoint found at '{}'".format(resume_path))
     if "best_auc" in checkpoint:
@@ -108,12 +109,8 @@ def save_checkpoint(
     if snapshot and state["epoch"] % snapshot == 0:
         shutil.copyfile(
             filepath,
-            os.path.join(
-                checkpoint, "checkpoint_{}.pth.tar".format(state["epoch"])
-            ),
+            os.path.join(checkpoint, "checkpoint_{}.pth.tar".format(state["epoch"])),
         )
 
     if is_best:
-        shutil.copyfile(
-            filepath, os.path.join(checkpoint, "model_best.pth.tar")
-        )
+        shutil.copyfile(filepath, os.path.join(checkpoint, "model_best.pth.tar"))
