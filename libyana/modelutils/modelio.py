@@ -100,7 +100,7 @@ def save_checkpoint(
     state,
     is_best,
     checkpoint="checkpoint",
-    filename="checkpoint.pth.tar",
+    filename="checkpoint.pth",
     snapshot=None,
 ):
     filepath = os.path.join(checkpoint, filename)
@@ -109,8 +109,8 @@ def save_checkpoint(
     if snapshot and state["epoch"] % snapshot == 0:
         shutil.copyfile(
             filepath,
-            os.path.join(checkpoint, "checkpoint_{}.pth.tar".format(state["epoch"])),
+            os.path.join(checkpoint, "checkpoint_{}.pth".format(state["epoch"])),
         )
 
     if is_best:
-        shutil.copyfile(filepath, os.path.join(checkpoint, "model_best.pth.tar"))
+        shutil.copyfile(filepath, os.path.join(checkpoint, "model_best.pth"))
