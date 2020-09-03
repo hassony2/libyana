@@ -49,7 +49,7 @@ def visualize_joints_2d(
     # Add idx labels to joints
     for row_idx, row in enumerate(joints):
         if joint_idxs:
-            plt.annotate(str(row_idx), (row[0], row[1]))
+            ax.annotate(str(row_idx), (row[0], row[1]))
     _draw2djoints(
         ax, joints, links, alpha=alpha, linewidth=linewidth, color=color
     )
