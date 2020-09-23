@@ -1,6 +1,3 @@
-from matplotlib import pyplot as plt
-
-
 def visualize_corners_2d(
     ax, corners, joint_idxs=False, links=None, alpha=1, linewidth=2
 ):
@@ -31,6 +28,7 @@ def visualize_joints_2d(
     linewidth=2,
     color=None,
     joint_labels=None,
+    axis_equal=True,
 ):
     if links is None:
         links = [
@@ -53,11 +51,12 @@ def visualize_joints_2d(
                 joint_label = str(row_idx)
             else:
                 joint_label = str(joint_labels[row_idx])
-            plt.annotate(joint_label, (row[0], row[1]))
+            ax.annotate(joint_label, (row[0], row[1]))
     _draw2djoints(
         ax, joints, links, alpha=alpha, linewidth=linewidth, color=color
     )
-    ax.axis("equal")
+    if axis_equal:
+        ax.axis("equal")
 
 
 def _draw2djoints(ax, annots, links, alpha=1, linewidth=1, color=None):

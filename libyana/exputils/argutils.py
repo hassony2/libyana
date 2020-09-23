@@ -4,6 +4,7 @@ import pickle
 import subprocess
 import sys
 import warnings
+import yaml
 
 
 def print_args(args):
@@ -56,3 +57,10 @@ def save_args(args, save_folder, opt_prefix="opt", verbose=True):
         pickle.dump(opts, opt_file)
     if verbose:
         print("Saved options to {}".format(opt_path))
+
+
+def save_args_yaml(args, save_folder, config_name="config.yaml"):
+    os.makedirs(save_folder, exist_ok=True)
+    config_path = os.path.join(save_folder, "config.yaml")
+    with open(config_path, "w") as f:
+        f.write(yaml.dump(args))
