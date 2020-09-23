@@ -30,6 +30,7 @@ def visualize_joints_2d(
     scatter=True,
     linewidth=2,
     color=None,
+    joint_labels=None,
 ):
     if links is None:
         links = [
@@ -48,7 +49,11 @@ def visualize_joints_2d(
     # Add idx labels to joints
     for row_idx, row in enumerate(joints):
         if joint_idxs:
-            plt.annotate(str(row_idx), (row[0], row[1]))
+            if joint_labels is None:
+                joint_label = str(row_idx)
+            else:
+                joint_label = str(joint_labels[row_idx])
+            plt.annotate(joint_label, (row[0], row[1]))
     _draw2djoints(
         ax, joints, links, alpha=alpha, linewidth=linewidth, color=color
     )

@@ -165,3 +165,127 @@ def fast_load_obj(file_obj, **kwargs):
         append_mesh()
 
     return meshes
+
+
+def fast_write_obj(vertices, faces, path):
+    """
+    Adapted from
+    https://github.com/mikedh/trimesh
+
+    Export a mesh as a Wavefront OBJ file
+    Parameters
+    -----------
+    mesh : trimesh.Trimesh
+      Mesh to be exported
+    Returns
+    -----------
+    export : str
+      OBJ format output
+    """
+    # store the multiple options for formatting
+    # vertex indexes for faces
+    face_formats = {
+        ("v",): "{}",
+        ("v", "vn"): "{}//{}",
+        ("v", "vt"): "{}/{}",
+        ("v", "vn", "vt"): "{}/{}/{}",
+    }
+    # we are going to reference face_formats with this
+    face_type = ["v"]
+
+    # otherwise just export vertices
+    v_blob = vertices
+
+    # add the first vertex key and convert the array
+    export = (
+        "v "
+        + array_to_string(v_blob, col_delim=" ", row_delim="\nv ", digits=8)
+        + "\n"
+    )
+
+    # the format for a single vertex reference of a face
+    face_format = face_formats[tuple(face_type)]
+    faces = "f " + array_to_string(
+        faces + 1, col_delim=" ", row_delim="\nf ", value_format=face_format
+    )
+    # add the exported faces to the export
+    export += faces
+
+    with open(path, "w") as t_f:
+        t_f.write(export)
+
+
+def array_to_string(
+    array, col_delim=" ", row_delim="\n", digits=8, value_format="{}"
+):
+    """
+    Convert a 1 or 2D array into a string with a specified number
+    of digits and delimiter. The reason this exists is that the
+    basic numpy array to string conversions are surprisingly bad.
+    Parameters
+    ------------
+    array : (n,) or (n, d) float or int
+       Data to be converted
+       If shape is (n,) only column delimiter will be used
+    col_delim : str
+      What string should separate values in a column
+    row_delim : str
+      What string should separate values in a row
+    digits : int
+      How many digits should floating point numbers include
+    value_format : str
+       Format string for each value or sequence of values
+       If multiple values per value_format it must divide
+       into array evenly.
+    Returns
+    ----------
+    formatted : str
+       String representation of original array
+    """
+    # convert inputs to correct types
+    array = np.asanyarray(array)
+    digits = int(digits)
+    row_delim = str(row_delim)
+    col_delim = str(col_delim)
+    value_format = str(value_format)
+
+    # abort for non- flat arrays
+    if len(array.shape) > 2:
+        raise ValueError(
+            "conversion only works on 1D/2D arrays not %s!", str(array.shape)
+        )
+
+    # allow a value to be repeated in a value format
+    repeats = value_format.count("{}")
+
+    if array.dtype.kind == "i":
+        # integer types don't need a specified precision
+        format_str = value_format + col_delim
+    elif array.dtype.kind == "f":
+        # add the digits formatting to floats
+        format_str = (
+            value_format.replace("{}", "{:." + str(digits) + "f}") + col_delim
+        )
+    else:
+        raise ValueError("dtype %s not convertible!", array.dtype.name)
+
+    # length of extra delimiters at the end
+    end_junk = len(col_delim)
+    # if we have a 2D array add a row delimiter
+    if len(array.shape) == 2:
+        format_str *= array.shape[1]
+        # cut off the last column delimiter and add a row delimiter
+        format_str = format_str[: -len(col_delim)] + row_delim
+        end_junk = len(row_delim)
+
+    # expand format string to whole array
+    format_str *= len(array)
+
+    # if an array is repeated in the value format
+    # do the shaping here so we don't need to specify indexes
+    shaped = np.tile(array.reshape((-1, 1)), (1, repeats)).reshape(-1)
+
+    # run the format operation and remove the extra delimiters
+    formatted = format_str.format(*shaped)[:-end_junk]
+
+    return formatted
