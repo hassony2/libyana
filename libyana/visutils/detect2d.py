@@ -38,11 +38,15 @@ def visualize_bboxes(
             label = None
         else:
             label = labels[box_idx]
+        if isinstance(color, str):
+            col = color
+        else:
+            col = color[box_idx]
         visualize_bbox(
             ax,
             box,
             label=label,
-            color=color,
+            color=col,
             alpha=alpha,
             linewidth=linewidth,
             label_color=label_color,
