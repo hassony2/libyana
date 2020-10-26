@@ -1,6 +1,6 @@
 from pytorch3d import transforms as py3dt
 
-from libyana.conversion import npt
+from libyana.conversions import npt
 
 
 def rot_points(points, centers=None, axisang=(0, 1, 1)):
