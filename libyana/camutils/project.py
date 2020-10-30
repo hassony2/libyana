@@ -1,6 +1,7 @@
 import numpy as np
 
 from libyana.conversions import npt
+from libyana.verify import checkshape
 
 
 def batch_proj2d(verts, camintr, camextr=None):
@@ -23,26 +24,38 @@ def homogenify_np(pts):
     return hom3d
 
 
-def proj2d(verts, camintr, camextr=None):
+def proj2d(verts, camintr, camextr=None, rot=None, trans=None):
+    if camextr is not None:
+        if rot is not None:
+            raise ValueError(
+                "camextr and rot should not be set simultaneously."
+            )
+        if trans is not None:
+            raise ValueError(
+                "camextr and trans should not be set simultaneously."
+            )
+
     verts = npt.numpify(verts)
     camintr = npt.numpify(camintr)
     if camextr is not None:
         camextr = npt.numpify(camextr)
-    if (verts.ndim != 2) & (verts.shape[1] == 3):
-        raise ValueError(
-            f"{verts.shape} is not valid (point_nb, 3) points shape"
-        )
+    if rot is not None:
+        rot = npt.numpify(rot)
+        checkshape.check_shape(rot, (3, 3), name="rot")
+    if trans is not None:
+        trans = npt.numpify(trans)
+        if trans.ndim == 1:
+            trans = trans[None, :]
+        checkshape.check_shape(trans, (1, 3), name="rot")
+    checkshape.check_shape(verts, (-1, 3), name="verts")
     if (camintr.ndim != 2) & (camintr.shape[1] == 3) & (camintr.shape[0] == 3):
         raise ValueError(f"{camintr.shape} is not valid (3, 3) camintr shape")
+    if rot is not None:
+        verts = rot.dot(verts.transpose()).transpose()
+    if trans is not None:
+        verts = trans + verts
     if camextr is not None:
-        if (
-            (camextr.ndim != 2)
-            & (camextr.shape[1] == 4)
-            & (camextr.shape[0] == 4)
-        ):
-            raise ValueError(
-                f"{camextr.shape} is not valid (4, 4) camextr shape"
-            )
+        checkshape.check_shape(camextr, (4, 4), name="camextr")
         hom3d = np.homogenify_np(verts)
         hom3d = camextr.dot(hom3d.transpose()).transpose()
         verts = hom3d[:, :3] / hom3d[:, 3:]
