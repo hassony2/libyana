@@ -25,6 +25,11 @@ def homogenify_np(pts):
 
 
 def proj2d(verts, camintr, camextr=None, rot=None, trans=None):
+    """
+    Returns:
+        proj2d (np.ndarray): projected point locations
+        verts (np.ndarray): vertex in camera space
+    """
     if camextr is not None:
         if rot is not None:
             raise ValueError(
@@ -62,4 +67,4 @@ def proj2d(verts, camintr, camextr=None, rot=None, trans=None):
 
     hom2d = camintr.dot(verts.transpose()).transpose()
     pts2d = hom2d[:, :2] / hom2d[:, 2:]
-    return pts2d
+    return pts2d, verts
