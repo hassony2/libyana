@@ -147,9 +147,12 @@ def add_imgrow(
                 ax.scatter(pts[:, 0], pts[:, 1], s=point_s, c=point_c)
         if overlays is not None:
             overlay_img = conv2img(overlays[img_idx])
-            overlay_mask = (overlay_img.sum(2) != overval * 3)[
-                :, :, np.newaxis
-            ]
+            if overlay_img.ndim == 2:
+                overlay_mask = (overlay_img != overval)[:, :]
+            else:
+                overlay_mask = (overlay_img.sum(2) != overval * 3)[
+                    :, :, np.newaxis
+                ]
             over_img = (
                 overlay_mask * img + (1 - overlay_mask) * img * over_alpha
             )
