@@ -24,6 +24,15 @@ def homogenify_np(pts):
     return hom3d
 
 
+def trans3d(verts, transf3d):
+    checkshape.check_shape(verts, (-1, 3), name="verts")
+    checkshape.check_shape(transf3d, (4, 4), name="transf3d")
+    hom3d = homogenify_np(verts)
+    hom3d = transf3d.dot(hom3d.transpose()).transpose()
+    verts = hom3d[:, :3] / hom3d[:, 3:]
+    return verts
+
+
 def proj2d(verts, camintr, camextr=None, rot=None, trans=None):
     """
     Returns:
@@ -59,11 +68,10 @@ def proj2d(verts, camintr, camextr=None, rot=None, trans=None):
         verts = rot.dot(verts.transpose()).transpose()
     if trans is not None:
         verts = trans + verts
+
     if camextr is not None:
         checkshape.check_shape(camextr, (4, 4), name="camextr")
-        hom3d = np.homogenify_np(verts)
-        hom3d = camextr.dot(hom3d.transpose()).transpose()
-        verts = hom3d[:, :3] / hom3d[:, 3:]
+        verts = trans3d(verts, camextr)
 
     hom2d = camintr.dot(verts.transpose()).transpose()
     pts2d = hom2d[:, :2] / hom2d[:, 2:]
