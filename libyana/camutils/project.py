@@ -76,3 +76,19 @@ def proj2d(verts, camintr, camextr=None, rot=None, trans=None):
     hom2d = camintr.dot(verts.transpose()).transpose()
     pts2d = hom2d[:, :2] / hom2d[:, 2:]
     return pts2d, verts
+
+
+def batch_projweak(weak_cams, pts):
+    checkshape.check_shape(weak_cams, (-1, 3), "weak_cam")
+    checkshape.check_shape(pts, (-1, -1, 3), "pts")
+    pweak = (pts * weak_cams[:, 0].view(pts.shape[0], 1, 1))[
+        :, :, :2
+    ] + weak_cams[:, 1:].unsqueeze(1)
+    return pweak
+
+
+def projweak(weak_cam, pts):
+    checkshape.check_shape(weak_cam, (3,), "weak_cam")
+    checkshape.check_shape(pts, (-1, 3), "pts")
+    pweak = (pts * weak_cam[0])[:, :2] + weak_cam[1:]
+    return pweak
