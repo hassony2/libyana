@@ -206,7 +206,7 @@ def viz_imgrow(
     plt.show()
 
 
-def save2imgrid(tensors_list, path="tmp.png", fig_height=3, show_axis=False):
+def viz_imgrid(tensors_list, path="tmp.png", fig_height=3, show_axis=False):
     row_nb = len(tensors_list)
     img_nb = len(tensors_list[0])
     fig, axes = plt.subplots(
@@ -221,4 +221,6 @@ def save2imgrid(tensors_list, path="tmp.png", fig_height=3, show_axis=False):
             ax.imshow(img)
             if show_axis:
                 ax.axis("off")
-    fig.savefig(path)
+    if path:
+        fig.savefig(path)
+    return fig
