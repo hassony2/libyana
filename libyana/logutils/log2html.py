@@ -87,7 +87,7 @@ def path2img(
 def df2html(df, local_folder="", drop_redundant=True, collapsible=True):
     """
     Convert df to html table, getting images for fields which contain 'img_path'
-    in their name.
+    in their name and videos for fields which contain 'video_path'
     """
     keys = list(df.keys())
     format_dicts = {}
