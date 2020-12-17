@@ -15,7 +15,7 @@ def print_args(args):
     print("========================")
 
 
-def save_args(args, save_folder, opt_prefix="opt", verbose=True):
+def save_args(args, save_folder, opt_prefix="opt", verbose=True, git=True):
     opts = vars(args)
     # Create checkpoint folder
     if not os.path.exists(save_folder):
@@ -34,23 +34,24 @@ def save_args(args, save_folder, opt_prefix="opt", verbose=True):
         )
 
         # Add git info
-        try:
-            label = subprocess.check_output(["git", "describe", "--always"]).strip()
-            if (
-                subprocess.call(
-                    ["git", "branch"],
-                    stderr=subprocess.STDOUT,
-                    stdout=open(os.devnull, "w"),
-                )
-                == 0
-            ):
-                opt_file.write("=== Git info ====\n")
-                opt_file.write("{}\n".format(label))
-                commit = subprocess.check_output(["git", "rev-parse", "HEAD"])
-                opt_file.write("commit : {}\n".format(commit.strip()))
+        if git:
+            try:
+                label = subprocess.check_output(["git", "describe", "--always"]).strip()
+                if (
+                    subprocess.call(
+                        ["git", "branch"],
+                        stderr=subprocess.STDOUT,
+                        stdout=open(os.devnull, "w"),
+                    )
+                    == 0
+                ):
+                    opt_file.write("=== Git info ====\n")
+                    opt_file.write("{}\n".format(label))
+                    commit = subprocess.check_output(["git", "rev-parse", "HEAD"])
+                    opt_file.write("commit : {}\n".format(commit.strip()))
 
-        except subprocess.CalledProcessError:
-            warnings.warn("Skipping git info, git not available")
+            except subprocess.CalledProcessError:
+                warnings.warn("Skipping git info, git not available")
     opt_picklename = "{}.pkl".format(opt_prefix)
     opt_picklepath = os.path.join(save_folder, opt_picklename)
     with open(opt_picklepath, "wb") as opt_file:
