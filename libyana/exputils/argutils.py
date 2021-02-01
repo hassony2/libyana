@@ -50,7 +50,7 @@ def save_args(args, save_folder, opt_prefix="opt", verbose=True, git=True):
                     commit = subprocess.check_output(["git", "rev-parse", "HEAD"])
                     opt_file.write("commit : {}\n".format(commit.strip()))
 
-            except subprocess.CalledProcessError:
+            except subprocess.CalledProcessError or PermissionError:
                 warnings.warn("Skipping git info, git not available")
     opt_picklename = "{}.pkl".format(opt_prefix)
     opt_picklepath = os.path.join(save_folder, opt_picklename)

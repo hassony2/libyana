@@ -14,7 +14,7 @@ def path2video(path, local_folder="", collapsible=True, call_nb=HTML_IDX):
         local_folder = Path(local_folder) / "video"
         local_folder.mkdir(exist_ok=True, parents=True)
 
-        ext = path.split(".")[-1]
+        ext = str(path).split(".")[-1]
         video_name = f"{call_nb[0]:04d}.{ext}"
         dest_img_path = local_folder / video_name
         shutil.copy(path, dest_img_path)
@@ -24,7 +24,7 @@ def path2video(path, local_folder="", collapsible=True, call_nb=HTML_IDX):
 
     # Keep track of count number
     call_nb[0] += 1
-    vid_ext = rel_path.split(".")[-1]
+    vid_ext = str(rel_path).split(".")[-1]
     vid_str = ('<video controls> <source src="' + str(rel_path) +
                f'" type="video/{vid_ext}"></video>')
     if collapsible:
@@ -68,7 +68,7 @@ def path2img(
         local_folder = Path(local_folder) / "imgs"
         local_folder.mkdir(exist_ok=True, parents=True)
 
-        ext = path.split(".")[-1]
+        ext = str(path).split(".")[-1]
         img_name = f"{call_nb[0]:04d}.{ext}"
         dest_img_path = local_folder / img_name
         shutil.copy(path, dest_img_path)
