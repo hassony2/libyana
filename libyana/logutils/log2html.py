@@ -63,6 +63,7 @@ def path2img(
     local_folder="",
     collapsible=True,
     call_nb=HTML_IDX,
+    height=None,
 ):
     if local_folder:
         local_folder = Path(local_folder) / "imgs"
@@ -78,13 +79,17 @@ def path2img(
 
     # Keep track of count number
     call_nb[0] += 1
+    if height is None:
+        end_str = '">'
+    else:
+        end_str = f'" height="{height}" />'
     img_str = '<img src="' + str(rel_path) + '"/>'
     if collapsible:
         img_str = make_collapsible(img_str, call_nb[0])
     return img_str
 
 
-def df2html(df, local_folder="", drop_redundant=True, collapsible=True):
+def df2html(df, local_folder="", drop_redundant=True, collapsible=True, img_height=None):
     """
     Convert df to html table, getting images for fields which contain 'img_path'
     in their name and videos for fields which contain 'video_path'
@@ -95,7 +100,8 @@ def df2html(df, local_folder="", drop_redundant=True, collapsible=True):
         if "img_path" in key:
             format_dicts[key] = partial(path2img,
                                         local_folder=local_folder,
-                                        collapsible=collapsible)
+                                        collapsible=collapsible,
+                                        height=img_height)
         elif "video_path" in key:
             format_dicts[key] = partial(path2video,
                                         local_folder=local_folder,
