@@ -10,6 +10,7 @@ from pytorch3d.renderer import (
     MeshRenderer,
     MeshRasterizer,
     SoftPhongShader,
+    HardPhongShader,
     SoftSilhouetteShader,
 )
 from pytorch3d.ops import interpolate_face_attributes
@@ -74,7 +75,8 @@ def batch_render(
         R=rot,
         T=trans,
     )
-    if mode == "rgb" and shading == "soft":
+    if mode == "rgb":
+        
         lights = PointLights(device=device, location=[[0.0, 0.0, -3.0]])
         lights = DirectionalLights(
             device=device,
@@ -83,7 +85,12 @@ def batch_render(
             diffuse_color=((diffuse_col, diffuse_col, diffuse_col), ),
             specular_color=((specular_col, specular_col, specular_col), ),
         )
-        shader = SoftPhongShader(device=device, cameras=cameras, lights=lights)
+        if shading == "soft":
+            shader = SoftPhongShader(device=device, cameras=cameras, lights=lights)
+        elif shading == "hard":
+            shader = HardPhongShader(device=device, cameras=cameras, lights=lights)
+        else:
+            raise ValueError(f"Shading {shading} for mode rgb not in [sort|hard]")
     elif mode == "silh":
         blend_params = BlendParams(sigma=1e-4, gamma=1e-4)
         shader = SoftSilhouetteShader(blend_params=blend_params)
