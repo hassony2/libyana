@@ -44,6 +44,7 @@ def batch_render(
     shading="soft",
     mode="rgb",
     blend_gamma=1e-4,
+    blend_sigma=1e-4,
     min_depth=None,
 ):
     device = torch.device("cuda:0")
@@ -86,13 +87,14 @@ def batch_render(
             specular_color=((specular_col, specular_col, specular_col), ),
         )
         if shading == "soft":
-            shader = SoftPhongShader(device=device, cameras=cameras, lights=lights)
+            blend_params = BlendParams(sigma=blend_sigma, gamma=blend_gamma)
+            shader = SoftPhongShader(device=device, cameras=cameras, lights=lights, blend_params=blend_params)
         elif shading == "hard":
             shader = HardPhongShader(device=device, cameras=cameras, lights=lights)
         else:
             raise ValueError(f"Shading {shading} for mode rgb not in [sort|hard]")
     elif mode == "silh":
-        blend_params = BlendParams(sigma=1e-4, gamma=1e-4)
+        blend_params = BlendParams(sigma=blend_sigma, gamma=blend_gamma)
         shader = SoftSilhouetteShader(blend_params=blend_params)
     elif shading == "faceidx":
         shader = FaceIdxShader()
