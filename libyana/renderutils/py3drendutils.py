@@ -11,6 +11,7 @@ from pytorch3d.renderer import (
     MeshRasterizer,
     SoftPhongShader,
     HardPhongShader,
+    HardFlatShader,
     SoftSilhouetteShader,
 )
 from pytorch3d.ops import interpolate_face_attributes
@@ -91,6 +92,8 @@ def batch_render(
             shader = SoftPhongShader(device=device, cameras=cameras, lights=lights, blend_params=blend_params)
         elif shading == "hard":
             shader = HardPhongShader(device=device, cameras=cameras, lights=lights)
+        elif shading == "flat":
+            shader = HardFlatShader(device=device, cameras=cameras, lights=lights)
         else:
             raise ValueError(f"Shading {shading} for mode rgb not in [sort|hard]")
     elif mode == "silh":
